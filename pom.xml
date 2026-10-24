@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.1.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.1.0 https://maven.apache.org/xsd/maven-4.1.0.xsd">
+    <modelVersion>4.1.0</modelVersion>
+
+    <parent>
+        <groupId>network.ike.platform</groupId>
+        <artifactId>ike-parent</artifactId>
+        <version>206</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>network.ike.komet</groupId>
+    <artifactId>komet-sequential-store-plugin</artifactId>
+    <version>1-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>Komet Sequential Store Plugin</name>
+    <description>
+        The sequential spined-array store, the 32-bit store Komet used before the 64-bit spined
+        array, as a Komet plugin. Komet stages it into its runtime plugins/ layer so a store on
+        disk can still be opened, to migrate it to the 64-bit store; once no store needs it, it is
+        dropped. Moved out of tinkar-core (provider/data-spinedarray-provider and the collection
+        module) under IKE-Network/ike-issues#1313.
+    </description>
+    <url>https://ike.network/komet-sequential-store-plugin/</url>
+    <inceptionYear>2026</inceptionYear>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <organization>
+        <name>IKE Network</name>
+        <url>https://ike.network</url>
+    </organization>
+
+    <scm>
+        <connection>scm:git:https://github.com/knowledge-graphlet/komet-sequential-store-plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:knowledge-graphlet/komet-sequential-store-plugin.git</developerConnection>
+        <url>https://github.com/knowledge-graphlet/komet-sequential-store-plugin</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <!-- Required: ike-parent's enforcer fails an inheriting project whose effective site URL still
+         starts with https://ike.network/ike-platform/ while its groupId is not network.ike.platform. -->
+    <distributionManagement>
+        <site>
+            <id>ike-site</id>
+            <url>https://ike.network/komet-sequential-store-plugin/</url>
+        </site>
+    </distributionManagement>
+
+    <!-- Snapshots of the IKE starter set resolve through here on a machine whose settings
+         enable no snapshot repository, such as the test agent (the same block as
+         complex-clause-plugin, rocks-kb, tinkar-service and komet carry). -->
+    <repositories>
+        <repository>
+            <id>tinkar-nexus</id>
+            <url>https://nexus.tinkar.org/repository/ike-public/</url>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>true</enabled></snapshots>
+        </repository>
+    </repositories>
+
+    <properties>
+        <!-- Main-line Komet BOM; manages the tinkar-core versions. Matches ike-komet-wsr. -->
+        <komet-bom.version>3.0.12-SNAPSHOT</komet-bom.version>
+        <!-- The IKE starter set the store tests load, from starter-data-ws. -->
+        <ike-starter-set.version>1-SNAPSHOT</ike-starter-set.version>
+        <java.version>27</java.version>
+        <!-- Lucene 10.5.1 turns its Vector API code on only up to Java 26 and warns on 27.
+             The property raises that limit. Drop it when a Lucene release supports Java 27. -->
+        <!-- log4j's JUL manager defaults to its API adapter, which refuses the JUnit
+             provider's Logger.setLevel call and prints three lines in every forked JVM;
+             the core adapter honors it. -->
+        <argLine>--sun-misc-unsafe-memory-access=allow -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager -Dlog4j.jul.LoggerAdapter=org.apache.logging.log4j.jul.CoreLoggerAdapter --add-modules jdk.incubator.vector -Dorg.apache.lucene.vectorization.upperJavaFeatureVersion=27</argLine>
+        <failsafeArgLine>-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager -Dlog4j.jul.LoggerAdapter=org.apache.logging.log4j.jul.CoreLoggerAdapter --add-modules jdk.incubator.vector -Dorg.apache.lucene.vectorization.upperJavaFeatureVersion=27</failsafeArgLine>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>dev.ikm.komet</groupId>
+                <artifactId>komet-bom</artifactId>
+                <version>${komet-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>dev.ikm.tinkar</groupId>
+            <artifactId>common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dev.ikm.tinkar</groupId>
+            <artifactId>component</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dev.ikm.tinkar</groupId>
+            <artifactId>entity</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dev.ikm.tinkar</groupId>
+            <artifactId>search-provider</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dev.ikm.jpms</groupId>
+            <artifactId>activej-bytebuf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.collections</groupId>
+            <artifactId>eclipse-collections-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.collections</groupId>
+            <artifactId>eclipse-collections</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <!-- Test: the store's own tests, and the provider conformance suite run against it. -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>dev.ikm.tinkar</groupId>
+            <artifactId>test-fixtures</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>dev.ikm.tinkar</groupId>
+            <artifactId>entity-provider</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>dev.ikm.tinkar</groupId>
+            <artifactId>executor-provider</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- The shared test logging configuration (log4j2-test.xml); a library ships none of its own. -->
+        <dependency>
+            <groupId>dev.ikm.tinkar</groupId>
+            <artifactId>test-logging</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-jul</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <!-- Every *IT class belongs to failsafe. -->
+                        <exclude>**/*IT.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Copy the IKE starter set into target/data, where the store tests load it from
+                 (TestConstants.PB_STARTER_DATA_REASONED). -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-starter-data</id>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>network.ike.foundation</groupId>
+                                    <artifactId>ike-starter-set</artifactId>
+                                    <version>${ike-starter-set.version}</version>
+                                    <classifier>reasoned-pb</classifier>
+                                    <type>zip</type>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${project.build.directory}/data</outputDirectory>
+                                    <destFileName>ike-starter-set-reasoned-pb.zip</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${project.build.directory}/data</outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <!-- Copy only when the installed starter set is newer than the copy here. -->
+                            <overWriteSnapshots>false</overWriteSnapshots>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
