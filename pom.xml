@@ -41,9 +41,9 @@
     </organization>
 
     <scm>
-        <connection>scm:git:https://github.com/knowledge-graphlet/komet-sequential-store-plugin.git</connection>
-        <developerConnection>scm:git:git@github.com:knowledge-graphlet/komet-sequential-store-plugin.git</developerConnection>
-        <url>https://github.com/knowledge-graphlet/komet-sequential-store-plugin</url>
+        <connection>scm:git:https://github.com/komet-plugins/komet-sequential-store-plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:komet-plugins/komet-sequential-store-plugin.git</developerConnection>
+        <url>https://github.com/komet-plugins/komet-sequential-store-plugin</url>
         <tag>HEAD</tag>
     </scm>
 
