@@ -1,32 +1,38 @@
 # komet-sequential-store-plugin
 
-The sequential (32-bit) spined-array store as a Komet plugin. It left tinkar-core under
-IKE-Network/ike-issues#1313: the module `dev.ikm.tinkar.provider.spinedarray` (once
-`tinkar-core/provider/data-spinedarray-provider`) with the spined maps it kept its data in (once
-tinkar-core's `collection` module, now the unexported `...spinedarray.collection` packages).
+The sequential (32-bit) spined-array store as a Komet plugin, kept so a store on disk can be opened and migrated to the 64-bit store (ike-issues#1313)
 
-The 64-bit spined array (`data-spinedarray64-provider` in tinkar-core) carries the memory-only and
-persistent roles. This store remains so a store on disk can be opened, to migrate it; once no
-store needs it, the plugin is dropped. Design and plan: `~/ike-dev/notes/2026-10-21-memory-only-store-switch.adoc`,
-section "Moving the sequential store into an external plugin".
+## Build Standards
 
-## Key Facts
-
-- GroupId: `network.ike.komet`; version `1-SNAPSHOT`; ike-parent 206; komet-bom for tinkar versions
-- Controllers: "Open SpinedArrayStore", "New SpinedArrayStore", and "Load Ephemeral Store"
-  (retired, hidden by Komet's chooser; kept for the store's own tests)
-- The module keeps its tinkar-core name: `dev.ikm.tinkar.common` exports
-  `dev.ikm.tinkar.common.service.internal` to it by name
-- Komet stages the jar into its runtime `plugins/` layer (komet-desktop `pom.xml`, beside
-  rocks-kb-engine). ike-knowledge-provider and tinkar-service take it at runtime scope, for the
-  published `reasoned-sa` stores
-- Tests run on the class path (ike-parent's `useModulePath=false`); the `*IT` suites load the IKE
-  starter set from `target/data`
+Files in `.claude/standards/` are build artifacts unpacked from `ike-build-standards`. DO NOT edit or commit them. See the workspace root CLAUDE.md for details.
 
 ## Build
 
-Inside a workspace, build from the workspace root: `./mvnw -pl komet-sequential-store-plugin ...`
-there, not from this directory (IKE-Network/ike-issues#1265).
+```bash
+mvn clean verify -DskipTests -T 1C
+```
+
+Inside a workspace, build from the workspace root: `mvn -pl <this-subproject>/<module> ...` there,
+not from this directory. Maven 4 resolves siblings outside the build from the project-local
+repository of the nearest `.mvn` root, and this subproject's own one goes stale
+(IKE-Network/ike-issues#1265).
+
+## Key Facts
+
+- GroupId: `network.ike.komet`
+- Version: `1-SNAPSHOT`
+- Uses `--enable-preview` (Java 27)
+- BOM: imports `dev.ikm.ike:ike-bom` for dependency version management
+
+## Prohibited Patterns
+
+- **Never use `maven-antrun-plugin`** — use a proper Maven goal or `exec-maven-plugin`
+- **Never use `build-helper-maven-plugin` for multi-execution property chaining** —
+  write a proper Maven goal in `ike-maven-plugin`
+- **Never embed shell commands inline in POM** — extract to a named script
+
+See `.claude/standards/` (after `mvn validate`) for full standards.
+See `CLAUDE-komet-sequential-store-plugin.md` for project-specific notes.
 
 <!-- BEGIN ike-managed: standards-pointer -->
 
