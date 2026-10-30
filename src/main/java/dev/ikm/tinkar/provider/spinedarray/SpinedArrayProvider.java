@@ -635,12 +635,16 @@ public class SpinedArrayProvider implements PrimitiveDataService, EntityStore, N
         // notification + per-nid catch-up when the proper design lands.
         // See LoadPhaseSearchPolicy javadoc for the full picture.
         // The index holds semantics only, so nothing else asks for the search service, which a
-        // write during startup — a STAMP cancelled as the store opens — would find not running yet.
-        if (sourceObject instanceof SemanticEntity
-                && (!loadPhase
-                || dev.ikm.tinkar.entity.EntityService.get().loadPhaseSearchPolicy().shouldIndexLive())) {
+        // write during startup — a STAMP cancelled as the store opens — would find not running yet;
+        // and only a semantic of a pattern the service indexes counts against the threshold.
+        if (sourceObject instanceof SemanticEntity<?> semantic) {
             try {
-                getSearchService().index(sourceObject);
+                SearchService search = getSearchService();
+                if (search.indexesPattern(semantic.patternNid())
+                        && (!loadPhase
+                        || dev.ikm.tinkar.entity.EntityService.get().loadPhaseSearchPolicy().shouldIndexLive())) {
+                    search.index(sourceObject);
+                }
             } catch (Exception e) {
                 // Search service may not be available yet during startup
                 LOG.debug("SearchService not available for indexing", e);
